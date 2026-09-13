@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Vision Chama - Anonymous Number Picker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .info-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .info-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-card h3 {
+            color: #667eea;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .info-card .amount {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #764ba2;
+            margin: 10px 0;
+        }
+
+        .text-small {
+            font-size: 0.85em;
+            color: #999;
+        }
+
+        .admin-login {
+            background: #f8d7da;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #f5c6cb;
+        }
+
+        .admin-login input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+            width: 200px;
+            margin-right: 10px;
+        }
+
+        .admin-login button {
+            padding: 10px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .admin-login button:hover {
+            background: #c82333;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .picker-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .picker-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .circle-number {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .circle-number:hover:not(:disabled) {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .circle-number:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .circle-number:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            filter: grayscale(100%);
+        }
+
+        .circle-number.picked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 15px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #f5c6cb;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .stats {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 2px solid #667eea;
+        }
+
+        .stats h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #28a745, #20c997);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.3s;
+        }
+
+        .admin-panel {
+            background: #fff3cd;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #ffc107;
+            display: none;
+        }
+
+        .admin-panel.show {
+            display: block;
+        }
+
+        .admin-panel h2 {
+            color: #856404;
+            margin-bottom: 20px;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 15px;
+        }
+
+        .admin-table thead {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .admin-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-download {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .btn-download:hover {
+            background: #218838;
+        }
+
+        .btn-reset {
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        .btn-reset:hover {
+            background: #c82333;
+        }
+
+        .btn-logout {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        .btn-logout:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎡 One Vision Chama</h1>
+            <p class="subtitle">Monthly Savings - Merry Go Round (Anonymous)</p>
+        </header>
+
+        <div class="info-section">
+            <div class="info-card">
+                <h3>💰 Contribution</h3>
+                <p class="amount">1,000/=</p>
+                <p class="text-small">Monthly</p>
+            </div>
+            <div class="info-card">
+                <h3>📅 Payment Date</h3>
+                <p class="amount">5th</p>
+                <p class="text-small">Every Month</p>
+            </div>
+            <div class="info-card">
+                <h3>👥 Members</h3>
+                <p class="amount">10</p>
+                <p class="text-small">Total Group Size</p>
+            </div>
+        </div>
+
+        <!-- ADMIN LOGIN -->
+        <div class="admin-login">
+            <strong>🔐 ADMIN ONLY:</strong>
+            <input type="password" id="adminPassword" placeholder="Enter admin password">
+            <button onclick="adminLogin()">Login</button>
+            <p style="font-size: 0.9em; margin-top: 5px; color: #721c24;">Default password: "admin123"</p>
+        </div>
+
+        <div class="main-content">
+            <!-- MEMBER PICKER SECTION -->
+            <div class="picker-section" id="memberSection">
+                <h2>🎲 Pick Your Number</h2>
+                <p style="color: #666; margin-bottom: 15px;">Click any colored circle to pick your lucky number. Only admin will know your choice!</p>
+                
+                <div class="success-message" id="successMessage"></div>
+                <div class="error-message" id="errorMessage"></div>
+
+                <form id="pickerForm">
+                    <div class="form-group">
+                        <label for="name">Your Name <span style="color: red;">*</span></label>
+                        <select id="name" required>
+                            <option value="">-- Choose Your Name --</option>
+                            <option value="Mitchelle Pius">Mitchelle Pius</option>
+                            <option value="Zipporah Nduku">Zipporah Nduku</option>
+                            <option value="Pius Munyalo">Pius Munyalo</option>
+                            <option value="Amos Pius">Amos Pius</option>
+                            <option value="Simon Kamau">Simon Kamau</option>
+                            <option value="Esther Wairimu">Esther Wairimu</option>
+                            <option value="Ivyone Kanini">Ivyone Kanini</option>
+                            <option value="Jane Ndunge">Jane Ndunge</option>
+                            <option value="Zipporah Syombua">Zipporah Syombua</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>🎯 Pick Your Lucky Number (Click any circle)</label>
+                        <div class="numbers-grid" id="numbersGrid">
+                            <!-- Circles will be generated here -->
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="selectedNumber" value="">
+                    <button type="submit" class="btn-submit">✅ Confirm My Pick</button>
+                </form>
+
+                <div class="stats">
+                    <h3>📊 Picking Progress</h3>
+                    <p id="progressText">0/10 members have picked</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%">
+                            <span id="progressPercent">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN PANEL -->
+            <div class="admin-panel" id="adminPanel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>🔐 ADMIN PANEL</h2>
+                    <button class="btn-logout" onclick="adminLogout()">Logout</button>
+                </div>
+                <p style="margin-bottom: 15px; color: #856404;">Here you can see who picked what number and the payment order.</p>
+
+                <h3>📋 All Picks (Name → Number Mapping)</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Pick Order</th>
+                            <th>Name</th>
+                            <th>Number Picked</th>
+                            <th>Pick Date/Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody">
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 30px;">💰 Payment Schedule (Payout Order by Number)</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th>Month</th>
+                            <th>Due Date</th>
+                            <th>Who Gets Paid</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminScheduleBody">
+                    </tbody>
+                </table>
+
+                <button class="btn-download" onclick="downloadAdminReport()">📥 Download Admin Report</button>
+                <button class="btn-reset" onclick="resetEverything()">🔄 Reset All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const ADMIN_PASSWORD = "admin123";
+        const members = [
+            'Mitchelle Pius',
+            'Zipporah Nduku',
+            'Pius Munyalo',
+            'Amos Pius',
+            'Simon Kamau',
+            'Esther Wairimu',
+            'Ivyone Kanini',
+            'Jane Ndunge',
+            'Zipporah Syombua'
+        ];
+
+        // Color palette for circles (vibrant colors)
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+            '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B788'
+        ];
+
+        // Data storage
+        let picks = JSON.parse(localStorage.getItem('picks')) || {};
+        let adminLoggedIn = false;
+        let shuffledNumbers = [];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            generateShuffledNumbers();
+            generateColoredCircles();
+            updateProgress();
+            setupFormListener();
+        }
+
+        // Shuffle numbers randomly
+        function generateShuffledNumbers() {
+            shuffledNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].sort(() => Math.random() - 0.5);
+        }
+
+        // Generate colored circles with shuffled numbers
+        function generateColoredCircles() {
+            const grid = document.getElementById('numbersGrid');
+            grid.innerHTML = '';
+            
+            shuffledNumbers.forEach((num, index) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'circle-number';
+                btn.textContent = num;
+                btn.style.backgroundColor = colors[index];
+                
+                // Check if number is already picked
+                const alreadyPicked = Object.values(picks).some(p => p.number === num);
+                if (alreadyPicked) {
+                    btn.disabled = true;
+                    btn.classList.add('picked');
+                }
+                
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    selectNumber(num, btn);
+                });
+                
+                grid.appendChild(btn);
+            });
+        }
+
+        // Select number
+        function selectNumber(num, btn) {
+            document.querySelectorAll('.circle-number').forEach(b => {
+                b.style.borderColor = 'transparent';
+            });
+            
+            btn.style.borderColor = 'white';
+            btn.style.borderWidth = '3px';
+            document.getElementById('selectedNumber').value = num;
+        }
+
+        // Handle form submission
+        function setupFormListener() {
+            document.getElementById('pickerForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('name').value;
+                const number = parseInt(document.getElementById('selectedNumber').value);
+                
+                document.getElementById('successMessage').classList.remove('show');
+                document.getElementById('errorMessage').classList.remove('show');
+
+                if (!name || !number) {
+                    showError('Please select your name and pick a number!');
+                    return;
+                }
+
+                // Check if this person already picked
+                if (picks[name]) {
+                    showError('❌ You have already picked! Only one pick per person.');
+                    return;
+                }
+
+                // Check if number is taken
+                const alreadyPicked = Object.values(picks).some(p => p.number === number);
+                if (alreadyPicked) {
+                    showError('❌ That number is already picked! Choose another.');
+                    return;
+                }
+
+                // Save the pick
+                picks[name] = {
+                    number: number,
+                    timestamp: new Date().toISOString(),
+                    pickOrder: Object.keys(picks).length + 1
+                };
+
+                localStorage.setItem('picks', JSON.stringify(picks));
+
+                showSuccess(`✅ ${name}, you picked number ${number}! Your pick is secure.`);
+
+                // Reset form
+                setTimeout(() => {
+                    document.getElementById('pickerForm').reset();
+                    document.querySelectorAll('.circle-number').forEach(b => {
+                        b.style.borderColor = 'transparent';
+                    });
+                    document.getElementById('selectedNumber').value = '';
+                    generateColoredCircles();
+                    updateProgress();
+                }, 1500);
+            });
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const picked = Object.keys(picks).length;
+            const total = 10;
+            const percent = (picked / total) * 100;
+
+            document.getElementById('progressText').textContent = `${picked}/${total} members have picked`;
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressPercent').textContent = Math.round(percent) + '%';
+        }
+
+        // Admin login
+        function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            
+            if (password === ADMIN_PASSWORD) {
+                adminLoggedIn = true;
+                document.getElementById('adminPanel').classList.add('show');
+                document.getElementById('memberSection').style.opacity = '0.5';
+                document.getElementById('memberSection').style.pointerEvents = 'none';
+                document.getElementById('adminPassword').value = '';
+                updateAdminPanel();
+                showSuccess('✅ Admin logged in successfully!');
+            } else {
+                showError('❌ Wrong password!');
+                document.getElementById('adminPassword').value = '';
+            }
+        }
+
+        // Admin logout
+        function adminLogout() {
+            adminLoggedIn = false;
+            document.getElementById('adminPanel').classList.remove('show');
+            document.getElementById('memberSection').style.opacity = '1';
+            document.getElementById('memberSection').style.pointerEvents = 'auto';
+            document.getElementById('adminPassword').value = '';
+            showSuccess('✅ Logged out successfully!');
+        }
+
+        // Update admin panel with current data
+        function updateAdminPanel() {
+            // Update picks table
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+
+            // Sort by pick order
+            const sortedPicks = Object.entries(picks).sort((a, b) => a[1].pickOrder - b[1].pickOrder);
+
+            sortedPicks.forEach((entry, index) => {
+                const name = entry[0];
+                const data = entry[1];
+                const row = document.createElement('tr');
+                const pickDate = new Date(data.timestamp).toLocaleString();
+
+                row.innerHTML = `
+                    <td><strong>${index + 1}</strong></td>
+                    <td><strong>${name}</strong></td>
+                    <td style="font-size: 1.3em; font-weight: bold; color: ${colors[index]};"> #${data.number}</td>
+                    <td>${pickDate}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update schedule table
+            const scheduleBody = document.getElementById('adminScheduleBody');
+            scheduleBody.innerHTML = '';
+
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const today = new Date();
+            let startMonth = today.getMonth() + 1;
+            let startYear = today.getFullYear();
+
+            if (startMonth > 11) {
+                startMonth = 0;
+                startYear++;
+            }
+
+            // Create number to name mapping
+            const numberToName = {};
+            sortedPicks.forEach(entry => {
+                numberToName[entry[1].number] = entry[0];
+            });
+
+            for (let i = 0; i < 10; i++) {
+                const monthIndex = (startMonth + i) % 12;
+                const year = startYear + Math.floor((startMonth + i) / 12);
+                const month = months[monthIndex];
+                const recipient = numberToName[i + 1] || '[Awaiting Pick]';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>Round ${i + 1}</strong></td>
+                    <td>${month} ${year}</td>
+                    <td>5th ${month}</td>
+                    <td><strong>${recipient}</strong></td>
+                    <td>10,000/=</td>
+                `;
+                scheduleBody.appendChild(row);
+            }
+        }
+
+        // Download admin report
+        function downloadAdminReport() {
+            let content = 'ONE VISION CHAMA - ADMIN REPORT\n';
+            content += '================================\n\n';
+            content += 'CONFIDENTIAL - Admin Eyes Only\n';
+            content += 'Generated: ' + new Date().toLocaleString() + '\n\n';
+
+            content += 'GROUP DETAILS:\n';
+            content += 'Contribution: 1,000/=\n';
+            content += 'Payment Date: 5th of every month\n';
+            content += 'Total Members: 10\n\n';
+
+            content += 'WHO PICKED WHAT (Secret Mapping):\n';
+            content += '---------------------------------\n';
+
+            const sortedPicks = Object.entries(picks).sort((a, b) => a[1].pickOrder - b[1].pickOrder);
+            sortedPicks.forEach((entry, index) => {
+                const name = entry[0];
+                const data = entry[1];
+                content += `${index + 1}. ${name} → Number #${data.number}\n`;
+            });
+
+            content += '\n\nPAYMENT SCHEDULE (Final Order - By Number):\n';
+            content += '-------------------------------------------\n';
+
+            const numberToName = {};
+            sortedPicks.forEach(entry => {
+                numberToName[entry[1].number] = entry[0];
+            });
+
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const today = new Date();
+            let startMonth = today.getMonth() + 1;
+            let startYear = today.getFullYear();
+
+            if (startMonth > 11) {
+                startMonth = 0;
+                startYear++;
+            }
+
+            for (let i = 0; i < 10; i++) {
+                const monthIndex = (startMonth + i) % 12;
+                const year = startYear + Math.floor((startMonth + i) / 12);
+                const month = months[monthIndex];
+                const recipient = numberToName[i + 1] || '[Empty]';
+
+                content += `Round ${i + 1} (${month} ${year}): ${recipient} gets 10,000/=\n`;
+            }
+
+            content += '\n\nNOTES:\n';
+            content += '- Keep this report secure\n';
+            content += '- Share payment schedule with group ONLY when each round starts\n';
+            content += '- Do not reveal individual picks\n';
+
+            // Download
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+            element.setAttribute('download', 'One-Vision-Chama-Admin-Report.txt');
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        // Reset everything
+        function resetEverything() {
+            if (confirm('⚠️ Are you SURE you want to reset ALL picks? This cannot be undone!')) {
+                if (confirm('FINAL WARNING: This will clear all data. Are you really sure?')) {
+                    localStorage.clear();
+                    picks = {};
+                    generateShuffledNumbers();
+                    generateColoredCircles();
+                    updateProgress();
+                    updateAdminPanel();
+                    showSuccess('✅ All data has been reset!');
+                }
+            }
+        }
+
+        // Show success message
+        function showSuccess(msg) {
+            const el = document.getElementById('successMessage');
+            el.textContent = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 4000);
+        }
+
+        // Show error message
+        function showError(msg) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 4000);
+        }
+
+        // Auto-save
+        window.addEventListener('beforeunload', function() {
+            localStorage.setItem('picks', JSON.stringify(picks));
+        });
+    </script>
+</body>
+</html>
